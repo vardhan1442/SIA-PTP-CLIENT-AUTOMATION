@@ -22,6 +22,8 @@ input{border:1px solid #cbdce6;border-radius:10px;padding:11px 14px;min-width:0;
 header{position:relative;overflow:hidden;color:#fff;background:radial-gradient(circle at 89% -95%,rgba(239,138,39,.85),transparent 36%),linear-gradient(112deg,#0b304f 0%,#115c94 68%,#1473ae 100%);padding:25px clamp(16px,3vw,48px) 28px;border-bottom:5px solid var(--orange)}
 header:after{content:"";position:absolute;right:-50px;bottom:-115px;width:280px;height:280px;border:1px solid rgba(255,255,255,.19);border-radius:50%;pointer-events:none}
 .header-inner{max-width:1600px;margin:auto;position:relative;z-index:1}
+.account-bar{position:absolute;top:0;right:0;display:flex;gap:8px;z-index:2}
+.account-bar button,.account-bar a{padding:7px 13px;font-size:13px;border-radius:999px}
 .eyebrow{color:#ffd6a3;text-transform:uppercase;letter-spacing:.18em;font-size:11px;font-weight:800}
 h1{font-size:clamp(25px,2.3vw,36px);letter-spacing:-.035em;margin:1px 0 0;line-height:1.2}
 .tagline{color:#d8edfa;margin:5px 0 18px;font-size:14px}
@@ -33,6 +35,8 @@ h3{font-size:15px;margin:18px 0 10px;color:var(--blue-deep)}
 #scan:hover{background:#ffac52;border-color:#ffac52}
 #csv{border-color:#9dc6dc;background:rgba(255,255,255,.13);color:#fff}
 #csv:hover{background:rgba(255,255,255,.25)}
+.account-link{border-color:#9dc6dc;background:rgba(255,255,255,.13);color:#fff;text-decoration:none;display:inline-flex;align-items:center}
+.account-link:hover{background:rgba(255,255,255,.25)}
 .path{font:12px/1.5 Consolas,monospace;word-break:break-all;color:var(--muted);margin-top:8px}
 header .path{color:#d7eaf5;max-width:1100px}
 main{max-width:1696px;margin:auto;padding:28px clamp(16px,3vw,48px) 64px}
@@ -114,13 +118,22 @@ figcaption{font-size:12px;color:var(--muted);word-break:break-all}
 .stage-list li:before{content:counter(stage);display:inline-grid;place-items:center;background:#dbeef8;color:#0b527c;width:24px;height:24px;border-radius:50%;margin-right:8px;font-weight:700}
 .stage-list li.interrupted{border-color:#efb2a2;background:#fff3ef}
 .stage-list small{display:block;color:var(--muted);margin:5px 0 0 32px}
+.breadcrumb{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:13px;margin-bottom:10px}
+.breadcrumb button{border:0;background:none;color:var(--blue);padding:2px 4px;font-size:13px}
+.breadcrumb button:hover{text-decoration:underline}
+.breadcrumb span{color:var(--muted)}
+.browse-table td:first-child{display:flex;align-items:center;gap:6px}
+.browse-table button.entry{border:0;background:none;color:inherit;font:inherit;padding:0;cursor:pointer;text-align:left}
+.browse-table button.entry:hover{color:var(--blue);text-decoration:underline}
+.browse-table td.size,.browse-table td.mtime{color:var(--muted);white-space:nowrap}
 @media(max-width:900px){.layout{display:block}.runs{position:static;max-height:260px;margin-bottom:16px}.summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){header{padding-top:20px}.search input{min-width:100%;width:100%}.search button{flex:1}.summary{gap:9px}.tile{padding:12px}.panel,.detail{padding:15px}.overview-table th:first-child,.overview-table td:first-child{min-width:145px}}
+@media(max-width:700px){.account-bar{position:static;justify-content:flex-end;margin-bottom:10px}}
 @media(prefers-reduced-motion:reduce){button{transition:none}}
 </style>
 </head>
 <body>
-<header><div class="header-inner"><div class="eyebrow">Run intelligence / Emulation</div><h1>Run dashboard</h1><p class="tagline">One view for every run. Detailed analysis when you need it.</p><div class="search"><input id="path" aria-label="Run area path" placeholder="Paste a run area or test directory"><button id="scan">Open run area</button><button id="csv" disabled>Export CSV</button></div><div class="path" id="location"></div></div></header>
+<header><div class="header-inner"><div class="account-bar"><a id="setupLink" class="account-link" href="/setup.html" hidden>Setup</a><button id="logout" class="account-link">Logout</button></div><div class="eyebrow">Run intelligence / Emulation</div><h1>Run dashboard</h1><p class="tagline">One view for every run. Detailed analysis when you need it.</p><div class="search"><input id="path" aria-label="Run area path" placeholder="Paste a run area or test directory"><button id="scan">Open run area</button><button id="csv" disabled>Export CSV</button><button id="browse">Browse files</button></div><div class="path" id="location"></div></div></header>
 <main id="main"><div class="panel muted">Paste a run area to see its runs. Choose a run to inspect bandwidth, charts, and loops.</div></main>
 <script>
 "use strict";
@@ -139,10 +152,10 @@ function duration(seconds){
  const hours=ms%24,days=Math.floor(ms/24);
  return `${days}:${String(hours).padStart(2,"0")}:${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}:${String(millis).padStart(3,"0")}`;
 }
-let state={root:null,tests:[],selected:null,tab:"Overview",deep:{},flow:{},gallery:{},galleryOpen:false,scanId:0,view:"run",sort:"name",reverse:false};
+let state={root:null,tests:[],selected:null,tab:"Overview",deep:{},flow:{},gallery:{},galleryOpen:false,scanId:0,view:"run",sort:"name",reverse:false,browseOpen:false,browsePath:null,browseCache:{},allowedRoots:[]};
 function name(t){return t.name.replace(/^do_/,"").replace(/_72MB_.*$/,"")}
 function url(route,params){return route+"?"+new URLSearchParams(params)}
-async function json(route,params){const r=await fetch(url(route,params));const data=await r.json();if(!r.ok)throw Error(data.error||`HTTP ${r.status}`);return data}
+async function json(route,params){const r=await fetch(url(route,params));if(r.status===401){location.href="/login.html";throw Error("not authenticated")}const data=await r.json();if(!r.ok)throw Error(data.error||`HTTP ${r.status}`);return data}
 function metrics(items){return `<div class="metrics">${items.map(([label,value])=>`<div><small>${esc(label)}</small><strong>${esc(value)}</strong></div>`).join("")}</div>`}
 function kv(data){return `<div class="kv">${Object.entries(data).map(([key,value])=>`<span>${esc(key)}</span><span>${esc(value??"—")}</span>`).join("")}</div>`}
 function table(rows){return `<div class="scroll"><table><tbody>${rows.map(([a,b])=>`<tr><td>${esc(a)}</td><td>${esc(b??"—")}</td></tr>`).join("")}</tbody></table></div>`}
@@ -151,7 +164,7 @@ async function scan(){
  const path=$("#path").value.trim();if(!path)return;
  const token=++state.scanId;$("#scan").disabled=true;$("#main").innerHTML='<div class="panel">Scanning run area…</div>';
  try{const result=await json("/api/scan",{path});if(token!==state.scanId)return;
-  state={...state,root:result.root,tests:result.tests,selected:result.tests[0]?.test_dir||null,tab:"Overview",view:"run",deep:{},flow:{},gallery:{},galleryOpen:false};
+  state={...state,root:result.root,tests:result.tests,selected:result.tests[0]?.test_dir||null,tab:"Overview",view:"run",deep:{},flow:{},gallery:{},galleryOpen:false,browseOpen:false,browsePath:result.root,browseCache:{}};
   history.replaceState(null,"","?path="+encodeURIComponent(path));
   $("#location").textContent=result.root;$("#csv").disabled=!result.count;render();loadFlow(state.selected);loadAllDeep();
  }catch(error){if(token===state.scanId)$("#main").innerHTML=errorText(error.message)}
@@ -162,8 +175,8 @@ function switchTab(tab){state.tab=tab;state.galleryOpen=false;render();if(["Char
 function compare(){state.view="compare";render()}
 function current(){return state.tests.find(t=>t.test_dir===state.selected)}
 const COLUMNS=[["name","Run"],["status","Status"],["exit","Exit"],["config","Cores"],["llc","LLC MB"],
- ["cclk","CCLK MHz"],["nclk","NCLK MHz"],["ddr","DDR"],["read","Read GB/s"],["write","Write GB/s"],
- ["total","Total GB/s"],["peak","Sum peaks GB/s"],["hit","L3 hit %"],["latency","Read ns"],["p99","p99 ns"],
+ ["cclk","CCLK MHz"],["nclk","NCLK MHz"],["ddr","DDR"],["read","DDR: Rd BW Avg (GB/s)"],["write","DDR: Wr BW Avg (GB/s)"],
+ ["total","DDR: Total BW Avg (GB/s)"],["peak","DDR: Peak BW (GB/s)"],["hit","L3 hit %"],["latency","Read ns"],["p99","p99 ns"],
  ["instructions","Instructions"],["expected","Expected instr"],["idi","IDI"],["miss","L2 miss"],
  ["rfoPref","RFO pref %"],["drdPref","DRd pref %"],["cycles","Cycles"],["runtime","Emu d:hh:mm:ss:ms"]];
 const DEEP_SOURCE={hit:"cbo",latency:"santa",p99:"santa",instructions:"xlsx",expected:"xlsx",idi:"xlsx",miss:"xlsx",rfoPref:"xlsx",drdPref:"xlsx"};
@@ -220,6 +233,7 @@ function refreshSummary(){
 function render(){
  const tests=state.tests,pass=tests.filter(t=>t.status==="PASS").length,fail=tests.filter(t=>t.status==="FAIL").length;
  $("#main").innerHTML=`<div class="muted">${tests.length} runs in this area</div>
+ ${state.browseOpen?`<section class="panel" style="margin-bottom:16px" id="browsePanel">${browseView()}</section>`:""}
  <div class="summary">${[["Runs",tests.length],["Passed",pass],["Failed",fail],["Other",tests.length-pass-fail]].map(([k,v])=>`<div class="tile"><span class="muted">${k}</span><b>${v}</b></div>`).join("")}</div>
  <section class="panel" style="margin-bottom:16px"><div class="detail-head"><div><h2>All-runs summary</h2><div class="muted">Click a row to inspect its run. Scroll right for detailed columns. Cache and latency come from trackers; instruction and IDI counts come from per-test workbooks.</div><div id="summaryProgress" class="muted" role="status">Analysing available sources in the background</div></div><button id="summaryDeep">Retry missing metrics</button></div>${summaryTable()}</section>
  <div class="layout"><nav class="runs" aria-label="Runs"><h2>All runs</h2>${tests.map(t=>`<button class="run ${state.view==="run"&&state.selected===t.test_dir?"selected":""}" data-run="${esc(t.test_dir)}"><span class="name">${esc(name(t))}</span><small><span class="pill ${esc(t.status)}">${esc(t.status)}</span> ${esc(t.config?.dies_cores||"")} · ${esc(t.config?.ddr||"")}</small></button>`).join("")}</nav><div class="detail">${state.view==="compare"?compareView():detailView()}</div></div>`;
@@ -230,7 +244,55 @@ function render(){
  const cmp=$("#compare");if(cmp)cmp.onclick=compare;
  const back=$("#back");if(back)back.onclick=()=>{state.view="run";render()};
  const orig=$("#original");if(orig)orig.onclick=()=>{state.galleryOpen=!state.galleryOpen;render();if(state.galleryOpen)loadGallery(state.selected)};
+ bindBrowse();
  renderCharts();
+}
+function byteSize(n){
+ if(n==null)return "—";
+ const units=["B","KB","MB","GB","TB"];let i=0,v=n;
+ while(v>=1024&&i<units.length-1){v/=1024;i++}
+ return (i===0?v:v.toFixed(1))+" "+units[i];
+}
+function toggleBrowse(){
+ state.browseOpen=!state.browseOpen;
+ if(state.browseOpen&&!state.browsePath)state.browsePath=state.root||$("#path").value.trim()||state.allowedRoots[0]||"/nfs/site/disks";
+ render();
+ if(state.browseOpen)loadBrowse(state.browsePath);
+}
+function useBrowsePath(){
+ if(!state.browsePath)return;
+ $("#path").value=state.browsePath;
+ state.browseOpen=false;
+ scan();
+}
+function browseView(){
+ const path=state.browsePath,entries=state.browseCache[path];
+ const segs=(path||"").split("/").filter(Boolean);
+ let acc="";
+ const crumbs=[`<button data-browse-crumb="/">/</button>`]
+  .concat(segs.map(seg=>{acc=acc+"/"+seg;return `<span>/</span><button data-browse-crumb="${esc(acc)}">${esc(seg)}</button>`}));
+ const body=entries==="loading"?'<div class="notice">Loading directory…</div>'
+  :entries?.error?errorText(entries.error)
+  :entries?`<div class="scroll"><table class="browse-table"><tbody>${entries.entries.length?entries.entries.map(e=>{
+    const full=path.replace(/\/$/,"")+"/"+e.name;
+    return `<tr><td>${e.is_dir?`📁 <button class="entry" data-browse-dir="${esc(full)}">${esc(e.name)}</button>`:`📄 <button class="entry" data-browse-file="${esc(full)}">${esc(e.name)}</button>`}</td><td class="size">${e.is_dir?"—":byteSize(e.size)}</td><td class="mtime">${e.mtime?new Date(e.mtime*1000).toLocaleString():"—"}</td></tr>`
+   }).join(""):'<tr><td colspan="3" class="muted">Empty directory</td></tr>'}</tbody></table></div>`
+  :'<div class="notice">Loading directory…</div>';
+ return `<div class="detail-head"><h3>Browse files</h3><div><button id="browseUse" title="Load this folder as the run area">Open this folder as run area</button> <button id="browseClose">Close</button></div></div><div class="breadcrumb">${crumbs.join("")}</div>${body}`;
+}
+function bindBrowse(){
+ document.querySelectorAll("[data-browse-crumb]").forEach(b=>b.onclick=()=>loadBrowse(b.dataset.browseCrumb));
+ document.querySelectorAll("[data-browse-dir]").forEach(b=>b.onclick=()=>loadBrowse(b.dataset.browseDir));
+ document.querySelectorAll("[data-browse-file]").forEach(b=>b.onclick=()=>window.open(url("/api/file",{path:b.dataset.browseFile}),"_blank"));
+ const close=$("#browseClose");if(close)close.onclick=()=>{state.browseOpen=false;render()};
+ const use=$("#browseUse");if(use)use.onclick=useBrowsePath;
+}
+async function loadBrowse(path){
+ state.browsePath=path;state.browseCache[path]="loading";
+ if($("#browsePanel"))$("#browsePanel").innerHTML=browseView();bindBrowse();
+ try{const data=await json("/api/browse",{path});state.browseCache[path]=data}
+ catch(error){state.browseCache[path]={error:error.message}}
+ if(state.browseOpen&&state.browsePath===path&&$("#browsePanel")){$("#browsePanel").innerHTML=browseView();bindBrowse()}
 }
 function detailView(){
  const t=current();if(!t)return '<div class="notice">No tests found here.</div>';
@@ -452,6 +514,10 @@ async function loadGallery(path){
 }
 $("#scan").onclick=scan;$("#path").onkeydown=e=>{if(e.key==="Enter")scan()};
 $("#csv").onclick=()=>{if(state.root)location.href=url("/api/csv",{path:state.root,deep:"1"})};
+$("#browse").onclick=toggleBrowse;
+$("#logout").onclick=async()=>{try{await fetch("/api/logout",{method:"POST"})}finally{location.href="/login.html"}};
+json("/api/config",{}).then(c=>{state.allowedRoots=c.allowed_roots||[]}).catch(()=>{});
+json("/api/me",{}).then(me=>{if(me.is_admin)$("#setupLink").hidden=false}).catch(()=>{});
 document.addEventListener("click",e=>{if(e.target.id==="compareDeep")state.tests.forEach(t=>loadDeep(t.test_dir))});
 document.addEventListener("click",e=>{if(e.target.id==="loadConfigDeep")loadDeep(state.selected)});
 const initial=new URLSearchParams(location.search).get("path");if(initial){$("#path").value=initial;scan()}

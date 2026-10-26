@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Run dashboard - Setup</title>
+<style>
+:root{font-family:system-ui,"Segoe UI",sans-serif;color:#173149;background:#f5f8fa;--blue:#116baf;--blue-deep:#0c3153;--orange:#ef8a27;--line:#dce7ec;--muted:#536b7c}
+*{box-sizing:border-box}
+body{margin:0}
+header{color:#fff;background:linear-gradient(112deg,#0b304f 0%,#115c94 68%,#1473ae 100%);padding:22px clamp(16px,3vw,48px);border-bottom:5px solid var(--orange)}
+header .inner{max-width:900px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-size:22px;margin:0}
+a.back{color:#d8edfa;text-decoration:none;font-size:13px;font-weight:600}
+a.back:hover{text-decoration:underline}
+main{max-width:900px;margin:28px auto;padding:0 clamp(16px,3vw,48px) 60px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:20px;box-shadow:0 10px 32px rgba(17,57,88,.055)}
+h2{font-size:16px;margin:0 0 14px;color:var(--blue-deep)}
+label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px;color:#16486d}
+input{width:100%;border:1px solid #cbdce6;border-radius:9px;padding:9px 12px;font:inherit}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.row>*{flex:1;min-width:180px}
+.check{display:flex;align-items:center;gap:8px;margin-top:14px}
+.check input{width:auto}
+button{margin-top:16px;border:1px solid var(--blue);background:var(--blue);color:#fff;border-radius:9px;padding:10px 16px;font-weight:700;cursor:pointer}
+button:hover{opacity:.9}
+button.danger{border-color:#d34d29;background:#d34d29}
+button.ghost{border-color:#cadce6;background:#fff;color:#16486d}
+.steps{list-style:none;counter-reset:step;padding:0;margin:0}
+.steps>li{counter-increment:step;margin:0 0 16px;padding-left:34px;position:relative}
+.steps>li:before{content:counter(step);position:absolute;left:0;top:0;display:inline-grid;place-items:center;background:#dbeef8;color:#0b527c;width:24px;height:24px;border-radius:50%;font-weight:700;font-size:13px}
+.steps h3{margin:0 0 6px;font-size:14px;color:#16486d}
+.steps p{margin:0 0 8px;font-size:13px;color:var(--muted)}
+.codebox{position:relative;background:#0c3153;border-radius:9px;padding:12px 44px 12px 14px}
+.codebox code{color:#dff0fb;font:12px/1.5 Consolas,monospace;white-space:pre-wrap;word-break:break-all}
+.codebox button{position:absolute;top:8px;right:8px;margin:0;padding:5px 9px;font-size:11px;border-color:#2f6a93;background:#15456b;color:#dff0fb}
+.codebox button:hover{background:#1c5a85}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+td,th{padding:9px 10px;border-bottom:1px solid #e7edf1;text-align:left}
+th{color:var(--muted);font-weight:700}
+.msg{margin-top:12px;padding:10px 13px;border-radius:8px;font-size:13px}
+.msg.ok{background:#dcf5e8;color:#09613b}
+.msg.error{background:#fff0eb;color:#8d2c16}
+</style>
+</head>
+<body>
+<header><div class="inner"><h1>Setup</h1><a class="back" href="/">&larr; Back to dashboard</a></div></header>
+<main>
+ <section class="panel">
+  <h2>New here? Run the tool on your Windows laptop</h2>
+  <p class="msg" style="background:#eff8fd;color:#0b527c">The server is plain Python with no Linux-only code, so it runs directly on Windows &mdash; no VNC host or SSH tunnel needed. Point it at your existing NFS path and browse straight to <code>localhost</code>.</p>
+  <ol class="steps">
+   <li>
+    <h3>Install Python and get the code</h3>
+    <p>Install Python 3 for Windows, then clone the repo in PowerShell.</p>
+    <div class="codebox"><code id="cmdCloneWin">git clone https://github.com/vardhan1442/SIA-PTP-CLIENT-AUTOMATION.git $HOME\runDashboard</code><button class="ghost copy" data-copy="cmdCloneWin">Copy</button></div>
+   </li>
+   <li>
+    <h3>Start the server with your NFS path</h3>
+    <p>Point <code>--allow-root</code> at wherever your existing NFS area is reachable from Windows (a mapped network drive or UNC path such as <code>\\server\share\disks</code>) &mdash; the same data you already use, just given to the tool.</p>
+    <div class="codebox"><code id="cmdRunWin">cd $HOME\runDashboard; python server.py --port 8765 --allow-root "Z:\site\disks"</code><button class="ghost copy" data-copy="cmdRunWin">Copy</button></div>
+    <p>The first start prints a one-time generated admin username and password to the terminal &mdash; copy it before it scrolls away.</p>
+   </li>
+   <li>
+    <h3>Open the dashboard</h3>
+    <p>Browse to <code>http://127.0.0.1:8765/</code> on the same laptop and sign in with the credentials from step 2.</p>
+   </li>
+   <li>
+    <h3>Secure the account</h3>
+    <p>Right after first login, come back to this Setup page and change the admin password below, or add your own named admin account and remove the generated one.</p>
+   </li>
+  </ol>
+ </section>
+ <section class="panel">
+  <h2>Users</h2>
+  <table id="userTable"><thead><tr><th>Username</th><th>Role</th><th></th></tr></thead><tbody></tbody></table>
+ </section>
+ <section class="panel">
+  <h2>Add user</h2>
+  <form id="addForm">
+   <div class="row">
+    <div><label for="newUsername">Username</label><input id="newUsername" required></div>
+    <div><label for="newPassword">Password</label><input id="newPassword" type="password" minlength="8" required></div>
+   </div>
+   <label class="check"><input id="newIsAdmin" type="checkbox"> Admin (can manage users)</label>
+   <button type="submit">Add user</button>
+  </form>
+  <div id="addMsg"></div>
+ </section>
+ <section class="panel">
+  <h2>Change my password</h2>
+  <form id="passForm">
+   <div class="row">
+    <div><label for="curPassword">Current password</label><input id="curPassword" type="password" required></div>
+    <div><label for="newOwnPassword">New password</label><input id="newOwnPassword" type="password" minlength="8" required></div>
+   </div>
+   <button type="submit">Update password</button>
+  </form>
+  <div id="passMsg"></div>
+ </section>
+</main>
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+document.querySelectorAll("button.copy").forEach(b=>b.onclick=async()=>{
+ try{await navigator.clipboard.writeText(document.getElementById(b.dataset.copy).textContent);
+  const original=b.textContent;b.textContent="Copied!";setTimeout(()=>b.textContent=original,1500)}
+ catch(error){alert("Could not copy: "+error.message)}
+});
+function showMsg(el,text,ok){el.innerHTML=`<div class="msg ${ok?"ok":"error"}">${text}</div>`}
+async function api(route,opts){
+ const r=await fetch(route,opts);
+ if(r.status===401){location.href="/login.html";throw Error("not authenticated")}
+ const data=await r.json().catch(()=>({}));
+ if(!r.ok)throw Error(data.error||`HTTP ${r.status}`);
+ return data;
+}
+async function loadUsers(){
+ const data=await api("/api/users");
+ $("#userTable tbody").innerHTML=data.users.map(u=>`<tr><td>${u.username}</td><td>${u.is_admin?"Admin":"User"}</td>
+  <td><button class="ghost danger" data-remove="${u.username}">Remove</button></td></tr>`).join("");
+ document.querySelectorAll("[data-remove]").forEach(b=>b.onclick=async()=>{
+  if(!confirm(`Remove user "${b.dataset.remove}"?`))return;
+  try{await api("/api/users?username="+encodeURIComponent(b.dataset.remove),{method:"DELETE"});await loadUsers()}
+  catch(error){alert(error.message)}
+ });
+}
+$("#addForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ try{
+  await api("/api/users",{method:"POST",headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({username:$("#newUsername").value,password:$("#newPassword").value,is_admin:$("#newIsAdmin").checked})});
+  showMsg($("#addMsg"),"User added.",true);
+  $("#addForm").reset();
+  await loadUsers();
+ }catch(error){showMsg($("#addMsg"),error.message,false)}
+});
+$("#passForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ try{
+  await api("/api/users/password",{method:"POST",headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({current_password:$("#curPassword").value,new_password:$("#newOwnPassword").value})});
+  showMsg($("#passMsg"),"Password updated.",true);
+  $("#passForm").reset();
+ }catch(error){showMsg($("#passMsg"),error.message,false)}
+});
+api("/api/me").then(me=>{if(!me.is_admin)location.href="/"}).catch(()=>{});
+loadUsers();
+</script>
+</body>
+</html>
