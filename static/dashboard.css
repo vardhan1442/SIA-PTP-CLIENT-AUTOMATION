@@ -31,10 +31,16 @@ h3{font-size:15px;margin:18px 0 10px;color:var(--blue-deep)}
 .account-link{border-color:#9dc6dc;background:rgba(255,255,255,.13);color:#fff;text-decoration:none;display:inline-flex;align-items:center}
 .account-link:hover{background:rgba(255,255,255,.25)}
 .domain-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-top:4px}
-.domain-card{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:22px 18px;text-align:left;cursor:pointer;border-top:4px solid var(--blue);transition:transform .15s,box-shadow .15s;text-decoration:none;display:block}
-.domain-card:hover{transform:translateY(-3px);box-shadow:0 14px 36px rgba(17,57,88,.1);border-color:var(--line)}
-.domain-card b{display:block;font-size:18px;color:var(--blue-deep);margin-bottom:4px}
-.domain-card span{color:var(--muted);font-size:12.5px}
+.domain-card{background:var(--blue-deep);border:1px solid transparent;border-radius:16px;box-shadow:var(--shadow);padding:22px 18px;text-align:left;cursor:pointer;transition:transform .15s,box-shadow .15s,filter .15s;text-decoration:none;display:block}
+.domain-card:hover{transform:translateY(-3px);box-shadow:0 14px 36px rgba(17,57,88,.25);filter:brightness(1.08)}
+.domain-card b{display:block;font-size:18px;color:#fff;margin-bottom:4px}
+.domain-card span{color:rgba(255,255,255,.85);font-size:12.5px}
+.domain-card:nth-child(1){background:#0b4f8a}
+.domain-card:nth-child(2){background:#0f766e}
+.domain-card:nth-child(3){background:#6d28d9}
+.domain-card:nth-child(4){background:#c2410c}
+.domain-card:nth-child(5){background:#be123c}
+.domain-card:nth-child(6){background:#115e59}
 .path{font:12px/1.5 Consolas,monospace;word-break:break-all;color:var(--muted);margin-top:8px}
 header .path{color:#d7eaf5;max-width:1100px}
 main{max-width:1696px;margin:auto;padding:28px clamp(16px,3vw,48px) 64px}
