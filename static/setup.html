@@ -51,8 +51,16 @@ th{color:var(--muted);font-weight:700}
   <p class="msg" style="background:#eff8fd;color:#0b527c">The server is plain Python with no Linux-only code, so it runs directly on Windows &mdash; no VNC host or SSH tunnel needed. Point it at your existing NFS path and browse straight to <code>localhost</code>.</p>
   <ol class="steps">
    <li>
-    <h3>Install Python and get the code</h3>
-    <p>Install Python 3 for Windows, then clone the repo in PowerShell.</p>
+    <h3>Install Python</h3>
+    <p>Open PowerShell and run this (built into Windows 10/11 via winget, no admin rights needed):</p>
+    <div class="codebox"><code id="cmdInstallPy">winget install -e --id Python.Python.3.12</code><button class="ghost copy" data-copy="cmdInstallPy">Copy</button></div>
+    <p>Close and reopen PowerShell, then confirm it worked:</p>
+    <div class="codebox"><code id="cmdCheckPy">python --version</code><button class="ghost copy" data-copy="cmdCheckPy">Copy</button></div>
+    <p>If that prints a Python 3.x version, you're set. If <code>winget</code> isn't available, install from <a href="https://www.python.org/downloads/windows/" target="_blank" rel="noopener">python.org/downloads/windows</a> instead &mdash; just make sure to check "Add python.exe to PATH" on the first install screen.</p>
+   </li>
+   <li>
+    <h3>Get the code</h3>
+    <p>Clone the repo in PowerShell.</p>
     <div class="codebox"><code id="cmdCloneWin">git clone https://github.com/vardhan1442/SIA-PTP-CLIENT-AUTOMATION.git $HOME\runDashboard</code><button class="ghost copy" data-copy="cmdCloneWin">Copy</button></div>
    </li>
    <li>
