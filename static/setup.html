@@ -60,7 +60,12 @@ th{color:var(--muted);font-weight:700}
    </li>
    <li>
     <h3>Get the code</h3>
-    <p>Clone the repo in PowerShell.</p>
+    <p>If <code>git</code> isn't already installed, run this in PowerShell (also built into Windows via winget, no admin rights needed):</p>
+    <div class="codebox"><code id="cmdInstallGit">winget install -e --id Git.Git</code><button class="ghost copy" data-copy="cmdInstallGit">Copy</button></div>
+    <p>Close and reopen PowerShell, then confirm it worked:</p>
+    <div class="codebox"><code id="cmdCheckGit">git --version</code><button class="ghost copy" data-copy="cmdCheckGit">Copy</button></div>
+    <p>If <code>winget</code> isn't available, install from <a href="https://git-scm.com/download/win" target="_blank" rel="noopener">git-scm.com/download/win</a> instead.</p>
+    <p>Then clone the repo.</p>
     <div class="codebox"><code id="cmdCloneWin">git clone https://github.com/vardhan1442/SIA-PTP-CLIENT-AUTOMATION.git $HOME\runDashboard</code><button class="ghost copy" data-copy="cmdCloneWin">Copy</button></div>
    </li>
    <li>
