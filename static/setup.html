@@ -70,8 +70,9 @@ th{color:var(--muted);font-weight:700}
    </li>
    <li>
     <h3>Start the server with your NFS path</h3>
-    <p>Point <code>--allow-root</code> at wherever your existing NFS area is reachable from Windows (a mapped network drive or UNC path such as <code>\\server\share\disks</code>) &mdash; the same data you already use, just given to the tool.</p>
-    <div class="codebox"><code id="cmdRunWin">cd $HOME\runDashboard; python server.py --port 8765 --allow-root "Z:\site\disks"</code><button class="ghost copy" data-copy="cmdRunWin">Copy</button></div>
+    <p>Point <code>--allow-root</code> at the UNC path for the NFS share &mdash; this works even if you haven't mapped a network drive letter, so it's the safest option for any laptop. No <code>net use</code> setup required.</p>
+    <div class="codebox"><code id="cmdRunWin">cd $HOME\runDashboard; python server.py --port 8765 --allow-root "\\samba.zsc10.intel.com\nfs\site\disks"</code><button class="ghost copy" data-copy="cmdRunWin">Copy</button></div>
+    <p>If you already have a mapped drive (e.g. <code>Z:</code>) pointing at the same share, that works too &mdash; just swap the path.</p>
     <p>The first start prints a one-time generated admin username and password to the terminal &mdash; copy it before it scrolls away.</p>
    </li>
    <li>
@@ -87,8 +88,8 @@ th{color:var(--muted);font-weight:700}
  <section class="panel">
   <h2>Already set up? Start the tool</h2>
   <p>Once Python, git, and the clone are done, this is the one command you need each time. Click below to copy it, then paste it into PowerShell and press Enter.</p>
-  <p>Uses the same <code>--allow-root</code> path you used the first time &mdash; edit it if your NFS path changed.</p>
-  <div class="codebox"><code id="cmdStartWin">cd $HOME\runDashboard; python server.py --port 8765 --allow-root "Z:\site\disks"</code><button class="ghost copy" data-copy="cmdStartWin">Copy</button></div>
+  <p>Uses the same <code>--allow-root</code> path you used the first time &mdash; edit it if your NFS path changed. The UNC path below works without a mapped drive letter.</p>
+  <div class="codebox"><code id="cmdStartWin">cd $HOME\runDashboard; python server.py --port 8765 --allow-root "\\samba.zsc10.intel.com\nfs\site\disks"</code><button class="ghost copy" data-copy="cmdStartWin">Copy</button></div>
   <button id="startServerBtn" data-copy="cmdStartWin">Start the server</button>
   <p id="startServerMsg" class="msg ok" hidden>Command copied &mdash; paste it into PowerShell and press Enter.</p>
   <p>Then browse to <code>http://127.0.0.1:8765/</code> and sign in. Leave the PowerShell window open while you use the tool; closing it stops the server.</p>
