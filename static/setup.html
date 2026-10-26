@@ -86,19 +86,12 @@ th{color:var(--muted);font-weight:700}
  </section>
  <section class="panel">
   <h2>Already set up? Start the tool</h2>
-  <p>Once Python, git, and the clone are done, starting the tool again is just two steps.</p>
-  <ol class="steps">
-   <li>
-    <h3>Open PowerShell in the project folder</h3>
-    <div class="codebox"><code id="cmdCdWin">cd $HOME\runDashboard</code><button class="ghost copy" data-copy="cmdCdWin">Copy</button></div>
-   </li>
-   <li>
-    <h3>Start the server</h3>
-    <p>Use the same <code>--allow-root</code> path you used the first time.</p>
-    <div class="codebox"><code id="cmdRunAgainWin">python server.py --port 8765 --allow-root "Z:\site\disks"</code><button class="ghost copy" data-copy="cmdRunAgainWin">Copy</button></div>
-    <p>Then browse to <code>http://127.0.0.1:8765/</code> and sign in. Leave this PowerShell window open while you use the tool; closing it stops the server.</p>
-   </li>
-  </ol>
+  <p>Once Python, git, and the clone are done, this is the one command you need each time. Click below to copy it, then paste it into PowerShell and press Enter.</p>
+  <p>Uses the same <code>--allow-root</code> path you used the first time &mdash; edit it if your NFS path changed.</p>
+  <div class="codebox"><code id="cmdStartWin">cd $HOME\runDashboard; python server.py --port 8765 --allow-root "Z:\site\disks"</code><button class="ghost copy" data-copy="cmdStartWin">Copy</button></div>
+  <button id="startServerBtn" data-copy="cmdStartWin">Start the server</button>
+  <p id="startServerMsg" class="msg ok" hidden>Command copied &mdash; paste it into PowerShell and press Enter.</p>
+  <p>Then browse to <code>http://127.0.0.1:8765/</code> and sign in. Leave the PowerShell window open while you use the tool; closing it stops the server.</p>
  </section>
  <section class="panel">
   <h2>Users</h2>
@@ -136,6 +129,12 @@ document.querySelectorAll("button.copy").forEach(b=>b.onclick=async()=>{
   const original=b.textContent;b.textContent="Copied!";setTimeout(()=>b.textContent=original,1500)}
  catch(error){alert("Could not copy: "+error.message)}
 });
+$("#startServerBtn").onclick=async()=>{
+ const btn=$("#startServerBtn"),msg=$("#startServerMsg");
+ try{await navigator.clipboard.writeText(document.getElementById(btn.dataset.copy).textContent);
+  msg.hidden=false;const original=btn.textContent;btn.textContent="Copied!";setTimeout(()=>btn.textContent=original,1500)}
+ catch(error){alert("Could not copy: "+error.message)}
+};
 function showMsg(el,text,ok){el.innerHTML=`<div class="msg ${ok?"ok":"error"}">${text}</div>`}
 async function api(route,opts){
  const r=await fetch(route,opts);
