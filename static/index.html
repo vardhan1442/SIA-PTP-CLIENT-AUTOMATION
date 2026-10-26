@@ -21,12 +21,39 @@
    <a class="domain-card" href="/display.html"><b>Display</b><span>Display pipeline</span></a>
   </div>
  </div>
+ <div class="panel">
+  <h2>Connection check</h2>
+  <p class="muted">Tell us which machine you're on, then check that this server can reach its data path from here.</p>
+  <div class="search">
+   <input id="machineName" placeholder="Machine name (e.g. your laptop or host name)">
+   <button id="checkConn">Check connection</button>
+  </div>
+  <div id="connMsg"></div>
+ </div>
 </main>
 <script>
 "use strict";
 const $=s=>document.querySelector(s);
 fetch("/api/me").then(r=>r.ok?r.json():null).then(me=>{if(me?.is_admin)$("#setupLink").hidden=false}).catch(()=>{});
 $("#logout").onclick=async()=>{try{await fetch("/api/logout",{method:"POST"})}finally{location.href="/login.html"}};
+const machineInput=$("#machineName");
+machineInput.value=localStorage.getItem("rd_machine")||"";
+async function checkConnection(){
+ const connMsg=$("#connMsg");
+ const machine=machineInput.value.trim();
+ localStorage.setItem("rd_machine",machine);
+ connMsg.innerHTML=`<p class="muted">Checking…</p>`;
+ try{
+  const r=await fetch("/api/access",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({machine})});
+  if(r.status===401){location.href="/login.html";return}
+  const data=await r.json();
+  connMsg.innerHTML=data.root_ok
+   ?`<p class="muted">Connected &mdash; ${data.root} is reachable from here.</p>`
+   :`<p class="error">Can't reach ${data.root||"the configured data path"} from here. Check your network/drive access.</p>`;
+ }catch(error){connMsg.innerHTML=`<p class="error">${error.message}</p>`}
+}
+$("#checkConn").onclick=checkConnection;
+checkConnection();
 </script>
 </body>
 </html>

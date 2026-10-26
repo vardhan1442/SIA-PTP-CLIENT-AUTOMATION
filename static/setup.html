@@ -99,6 +99,11 @@ th{color:var(--muted);font-weight:700}
   <table id="userTable"><thead><tr><th>Username</th><th>Role</th><th></th></tr></thead><tbody></tbody></table>
  </section>
  <section class="panel">
+  <h2>Recent access</h2>
+  <p class="muted">Username and machine info reported from the Connection check on the home page.</p>
+  <table id="accessTable"><thead><tr><th>When</th><th>User</th><th>Machine</th><th>IP</th><th>Data path reachable</th></tr></thead><tbody></tbody></table>
+ </section>
+ <section class="panel">
   <h2>Add user</h2>
   <form id="addForm">
    <div class="row">
@@ -173,8 +178,15 @@ $("#passForm").addEventListener("submit",async e=>{
   $("#passForm").reset();
  }catch(error){showMsg($("#passMsg"),error.message,false)}
 });
+async function loadAccess(){
+ const data=await api("/api/access");
+ $("#accessTable tbody").innerHTML=data.entries.map(e=>`<tr><td>${new Date(e.ts*1000).toLocaleString()}</td>
+  <td>${e.user}</td><td>${e.machine||"&mdash;"}</td><td>${e.remote_addr}</td>
+  <td>${e.root_ok?"Yes":"No"}</td></tr>`).join("");
+}
 api("/api/me").then(me=>{if(!me.is_admin)location.href="/"}).catch(()=>{});
 loadUsers();
+loadAccess();
 </script>
 </body>
 </html>

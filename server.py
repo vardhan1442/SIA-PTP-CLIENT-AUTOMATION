@@ -31,6 +31,8 @@ import extract  # noqa: E402
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC = os.path.join(APP_DIR, "static")
 USERS_FILE = os.path.join(APP_DIR, "users.json")
+ACCESS_LOG_FILE = os.path.join(APP_DIR, "access_log.jsonl")
+ACCESS_LOG_MAX = 500
 ALLOWED_ROOTS = []
 SUMMARY_POOL = cf.ThreadPoolExecutor(8)
 DEEP_POOL = cf.ThreadPoolExecutor(2)  # tracker parsing is heavy; keep NFS + CPU load modest
@@ -44,6 +46,7 @@ LOGIN_WINDOW_S = 300
 _users_lock = threading.Lock()
 _sessions, _sessions_lock = {}, threading.Lock()
 _login_attempts, _login_attempts_lock = {}, threading.Lock()
+_access_lock = threading.Lock()
 
 
 def _load_users():
@@ -71,6 +74,35 @@ def _hash_password(password, salt=None):
 def _verify_password(password, salt_hex, hash_hex):
     _, digest_hex = _hash_password(password, bytes.fromhex(salt_hex))
     return hmac.compare_digest(digest_hex, hash_hex)
+
+
+def _record_access(entry):
+    with _access_lock:
+        lines = []
+        if os.path.exists(ACCESS_LOG_FILE):
+            with open(ACCESS_LOG_FILE) as fh:
+                lines = fh.readlines()
+        lines.append(json.dumps(entry) + "\n")
+        lines = lines[-ACCESS_LOG_MAX:]
+        tmp = ACCESS_LOG_FILE + ".tmp"
+        with open(tmp, "w") as fh:
+            fh.writelines(lines)
+        os.replace(tmp, ACCESS_LOG_FILE)
+
+
+def _recent_access(limit=100):
+    if not os.path.exists(ACCESS_LOG_FILE):
+        return []
+    with _access_lock, open(ACCESS_LOG_FILE) as fh:
+        lines = fh.readlines()
+    out = []
+    for line in lines[-limit:]:
+        try:
+            out.append(json.loads(line))
+        except ValueError:
+            continue
+    out.reverse()
+    return out
 
 
 def _bootstrap_users():
@@ -244,6 +276,7 @@ class Handler(SimpleHTTPRequestHandler):
                     "/api/browse": self.api_browse,
                     "/api/file": self.api_file,
                     "/api/users": lambda qq: self.api_users_list(qq, session),
+                    "/api/access": lambda qq: self.api_access_list(qq, session),
                 }.get(u.path)
                 if not route:
                     return self._json({"error": "unknown endpoint"}, 404)
@@ -288,6 +321,7 @@ class Handler(SimpleHTTPRequestHandler):
                 "/api/logout": self.api_logout,
                 "/api/users": self.api_users_create,
                 "/api/users/password": self.api_users_password,
+                "/api/access": self.api_access_record,
             }.get(u.path)
             if not route:
                 return self._json({"error": "unknown endpoint"}, 404)
@@ -410,6 +444,27 @@ class Handler(SimpleHTTPRequestHandler):
 
     def api_config(self, q):
         self._json({"allowed_roots": ALLOWED_ROOTS, "cache_dir": extract.CACHE_DIR})
+
+    def api_access_record(self, body, session):
+        """Log who connected from which machine, and report whether the data root is reachable from here."""
+        machine = (body.get("machine") or "").strip()[:200]
+        root = ALLOWED_ROOTS[0] if ALLOWED_ROOTS else None
+        root_ok = bool(root and os.path.isdir(root))
+        entry = {
+            "ts": time.time(),
+            "user": session["user"],
+            "machine": machine,
+            "remote_addr": self.client_address[0],
+            "root": root,
+            "root_ok": root_ok,
+        }
+        _record_access(entry)
+        self._json({"ok": True, "root": root, "root_ok": root_ok})
+
+    def api_access_list(self, q, session):
+        if not session["is_admin"]:
+            raise PermissionError("admin only")
+        self._json({"entries": _recent_access(100)})
 
     def api_browse(self, q):
         real = resolve(q.get("path"))
