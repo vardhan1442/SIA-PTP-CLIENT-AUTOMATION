@@ -11,7 +11,7 @@
 <main id="main"></main>
 <script>
 window.DASHBOARD_DOMAIN="Traces";
-window.DASHBOARD_BASE="/nfs/site/disks/csa_pnp_bdc_003/vardhan/RZL/Traces";
+window.DASHBOARD_BASE=/win/i.test(navigator.platform)?"\\\\samba.zsc10.intel.com\\nfs\\site\\disks\\csa_pnp_bdc_003\\vardhan\\RZL\\Traces":"/nfs/site/disks/csa_pnp_bdc_003/vardhan/RZL/Traces";
 </script>
 <script src="/dashboard.js"></script>
 <script>initDashboard();</script>
