@@ -26,7 +26,7 @@ import xml.etree.ElementTree as ET
 
 CACHE_DIR = os.environ.get("RUNDASH_CACHE", os.path.expanduser("~/.cache/runDashboard"))
 SCHEMA_VERSION = 8
-MAX_SCAN_DEPTH = 4
+MAX_SCAN_DEPTH = 8
 CHAINSAW_METRICS = ("output.counts.txt.gz", "output.overall_bw_stats.txt.gz",
                     "output.bw_stats_bygrp.txt.gz", "output.overall_latency_stats.txt.gz")
 INC_PATH = re.compile(r"user\.MINIBIOS_[A-Z0-9_]*INC[A-Z0-9_]*PATHS=([^\s]+?\.inc)\b")

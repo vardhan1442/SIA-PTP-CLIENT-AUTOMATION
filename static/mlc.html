@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MLC dashboard</title>
+<link rel="stylesheet" href="/dashboard.css">
+</head>
+<body>
+<header><div class="header-inner"><div class="account-bar"><a class="account-link" href="/">&larr; All domains</a><a id="setupLink" class="account-link" href="/setup.html" hidden>Setup</a><button id="logout" class="account-link">Logout</button></div><div class="eyebrow">MLC / Emulation</div><h1>MLC dashboard</h1><p class="tagline">Memory latency / bandwidth runs. Detailed analysis when you need it.</p><div class="search"><input id="path" aria-label="Run area path" placeholder="Paste a run area or test directory"><button id="scan">Open run area</button><button id="csv" disabled>Export CSV</button><button id="browse">Browse files</button></div><div class="path" id="location"></div></div></header>
+<main id="main"></main>
+<script>
+window.DASHBOARD_DOMAIN="MLC";
+window.DASHBOARD_BASE="/nfs/site/disks/csa_pnp_bdc_003/vardhan/RZL/MLC";
+</script>
+<script src="/dashboard.js"></script>
+<script>initDashboard();</script>
+</body>
+</html>
