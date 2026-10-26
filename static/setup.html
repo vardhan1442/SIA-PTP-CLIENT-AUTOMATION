@@ -85,6 +85,22 @@ th{color:var(--muted);font-weight:700}
   </ol>
  </section>
  <section class="panel">
+  <h2>Already set up? Start the tool</h2>
+  <p>Once Python, git, and the clone are done, starting the tool again is just two steps.</p>
+  <ol class="steps">
+   <li>
+    <h3>Open PowerShell in the project folder</h3>
+    <div class="codebox"><code id="cmdCdWin">cd $HOME\runDashboard</code><button class="ghost copy" data-copy="cmdCdWin">Copy</button></div>
+   </li>
+   <li>
+    <h3>Start the server</h3>
+    <p>Use the same <code>--allow-root</code> path you used the first time.</p>
+    <div class="codebox"><code id="cmdRunAgainWin">python server.py --port 8765 --allow-root "Z:\site\disks"</code><button class="ghost copy" data-copy="cmdRunAgainWin">Copy</button></div>
+    <p>Then browse to <code>http://127.0.0.1:8765/</code> and sign in. Leave this PowerShell window open while you use the tool; closing it stops the server.</p>
+   </li>
+  </ol>
+ </section>
+ <section class="panel">
   <h2>Users</h2>
   <table id="userTable"><thead><tr><th>Username</th><th>Role</th><th></th></tr></thead><tbody></tbody></table>
  </section>
