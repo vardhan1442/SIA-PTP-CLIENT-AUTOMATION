@@ -73,11 +73,11 @@ th{color:var(--muted);font-weight:700}
     <p>Point <code>--allow-root</code> at the UNC path for the NFS share &mdash; this works even if you haven't mapped a network drive letter, so it's the safest option for any laptop. No <code>net use</code> setup required.</p>
     <div class="codebox"><code id="cmdRunWin">cd $HOME\runDashboard; python server.py --port 8765 --allow-root "\\samba.zsc10.intel.com\nfs\site\disks"</code><button class="ghost copy" data-copy="cmdRunWin">Copy</button></div>
     <p>If you already have a mapped drive (e.g. <code>Z:</code>) pointing at the same share, that works too &mdash; just swap the path.</p>
-    <p>The first start prints a one-time generated admin username and password to the terminal &mdash; copy it before it scrolls away.</p>
+    <p>The first start creates a default admin account: username <code>admin</code>, password <code>Intel@123</code>.</p>
    </li>
    <li>
     <h3>Open the dashboard</h3>
-    <p>Browse to <code>http://127.0.0.1:8765/</code> on the same laptop and sign in with the credentials from step 2.</p>
+    <p>Browse to <code>http://127.0.0.1:8765/</code> on the same laptop and sign in with <code>admin</code> / <code>Intel@123</code>.</p>
    </li>
    <li>
     <h3>Secure the account</h3>

@@ -108,7 +108,7 @@ def _recent_access(limit=100):
 def _bootstrap_users():
     if _load_users():
         return
-    password = secrets.token_urlsafe(12)
+    password = "Intel@123"
     salt_hex, hash_hex = _hash_password(password)
     _save_users({"admin": {"salt": salt_hex, "hash": hash_hex, "is_admin": True}})
     print(f"[runDashboard] Created default admin account. Username: admin  Password: {password}", flush=True)
