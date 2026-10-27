@@ -133,6 +133,7 @@ function browseView(){
  let acc="";
  const crumbs=[`<button data-browse-crumb="/">/</button>`]
   .concat(segs.map(seg=>{acc=acc+"/"+seg;return `<span>/</span><button data-browse-crumb="${esc(acc)}">${esc(seg)}</button>`}));
+ const parent=entries&&entries!=="loading"&&!entries.error?entries.parent:null;
  const body=entries==="loading"?'<div class="notice">Loading directory…</div>'
   :entries?.error?errorText(entries.error)
   :entries?`<div class="scroll"><table class="browse-table"><tbody>${entries.entries.length?entries.entries.map(e=>{
@@ -140,7 +141,7 @@ function browseView(){
     return `<tr><td>${e.is_dir?`📁 <button class="entry" data-browse-dir="${esc(full)}">${esc(e.name)}</button>`:`📄 <button class="entry" data-browse-file="${esc(full)}">${esc(e.name)}</button>`}</td><td class="size">${e.is_dir?"—":byteSize(e.size)}</td><td class="mtime">${e.mtime?new Date(e.mtime*1000).toLocaleString():"—"}</td></tr>`
    }).join(""):'<tr><td colspan="3" class="muted">Empty directory</td></tr>'}</tbody></table></div>`
   :'<div class="notice">Loading directory…</div>';
- return `<div class="detail-head"><h3>Browse files</h3><div><button id="browseUse" title="Load this folder as the run area">Open this folder as run area</button> <button id="browseClose">Close</button></div></div><div class="breadcrumb">${crumbs.join("")}</div>${body}`;
+ return `<div class="detail-head"><h3>Browse files</h3><div><button id="browseBack" ${parent?"":"disabled"} title="Go to parent folder">&larr; Back</button> <button id="browseUse" title="Load this folder as the run area">Open this folder as run area</button> <button id="browseClose">Close</button></div></div><div class="breadcrumb">${crumbs.join("")}</div>${body}`;
 }
 function bindBrowse(){
  document.querySelectorAll("[data-browse-crumb]").forEach(b=>b.onclick=()=>loadBrowse(b.dataset.browseCrumb));
@@ -148,6 +149,12 @@ function bindBrowse(){
  document.querySelectorAll("[data-browse-file]").forEach(b=>b.onclick=()=>window.open(url("/api/file",{path:b.dataset.browseFile}),"_blank"));
  const close=$("#browseClose");if(close)close.onclick=()=>{state.browseOpen=false;render()};
  const use=$("#browseUse");if(use)use.onclick=useBrowsePath;
+ const back=$("#browseBack");
+ if(back&&!back.disabled){
+  const entries=state.browseCache[state.browsePath];
+  const parent=entries&&entries!=="loading"&&!entries.error?entries.parent:null;
+  if(parent)back.onclick=()=>loadBrowse(parent);
+ }
 }
 async function loadBrowse(path){
  state.browsePath=path;state.browseCache[path]="loading";
